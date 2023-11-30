@@ -1,0 +1,94 @@
+﻿<Window x:Class="IRWindSim.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IRWindSim"
+        mc:Ignorable="d"
+        Title="iRacing Wind Sim" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
+            <RadioButton x:Name="imperial" Content="Imperial" Click="Update" GroupName="units" Margin="0,0,5,0" />
+            <RadioButton x:Name="metric" Content="Metric" Click="Update" GroupName="units" Margin="5,0,0,0" />
+        </StackPanel>
+        <Grid Grid.Row="1" Margin="0,5,0,5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Speed" />
+                <TextBox x:Name="speed_0" Grid.Column="1" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="speed_1" Grid.Column="2" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="speed_2" Grid.Column="3" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="speed_3" Grid.Column="4" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="speed_4" Grid.Column="5" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="speed_5" Grid.Column="6" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="speed_6" Grid.Column="7" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="speed_7" Grid.Column="8" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Wind Power" />
+                <TextBox x:Name="fanPower_0" Grid.Column="1" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="fanPower_1" Grid.Column="2" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="fanPower_2" Grid.Column="3" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="fanPower_3" Grid.Column="4" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="fanPower_4" Grid.Column="5" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="fanPower_5" Grid.Column="6" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="fanPower_6" Grid.Column="7" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBox x:Name="fanPower_7" Grid.Column="8" TextChanged="Update" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+            </Grid>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Test" />
+                <RadioButton x:Name="test_0" Grid.Column="1" Click="Test" GroupName="test" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <RadioButton x:Name="test_1" Grid.Column="2" Click="Test" GroupName="test" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <RadioButton x:Name="test_2" Grid.Column="3" Click="Test" GroupName="test" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <RadioButton x:Name="test_3" Grid.Column="4" Click="Test" GroupName="test" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <RadioButton x:Name="test_4" Grid.Column="5" Click="Test" GroupName="test" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <RadioButton x:Name="test_5" Grid.Column="6" Click="Test" GroupName="test" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <RadioButton x:Name="test_6" Grid.Column="7" Click="Test" GroupName="test" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <RadioButton x:Name="test_7" Grid.Column="8" Click="Test" GroupName="test" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+        </Grid>
+        <CheckBox x:Name="curve" Grid.Row="2" Content="Curve" Click="Update" Margin="0,5,0,0" />
+    </Grid>
+</Window>

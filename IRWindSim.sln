@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRWindSim", "IRWindSim.csproj", "{DA5F9320-1C1F-406A-9F0B-A05EF07B64EB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA5F9320-1C1F-406A-9F0B-A05EF07B64EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA5F9320-1C1F-406A-9F0B-A05EF07B64EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA5F9320-1C1F-406A-9F0B-A05EF07B64EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA5F9320-1C1F-406A-9F0B-A05EF07B64EB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A5B14DA0-A2EB-4796-9E53-1B53A6ECC181}
+	EndGlobalSection
+EndGlobal
