@@ -1,61 +1,44 @@
 ﻿
-using HerboldRacing;
 using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 
+using IRSDKSharper;
+
 namespace IRWindSim
 {
 	public partial class MainWindow : Window
 	{
-		bool disableUpdates = false;
+		const float MPS_TO_MPH = 2.23694f;
+		const float MPS_TO_KPH = 3.6f;
+
+		static readonly byte[] handshake = { (byte) 'w', (byte) 'i', (byte) 'n', (byte) 'd' };
+
+		bool disableWindowUpdates = false;
+		bool arduinoIsConnected = false;
 
 		int testBand = -1;
-
-		UdpClient udpClient;
-		SRSPacket srsPacket;
-		int srsPacketSize;
-		byte[] srsPacketBytes;
-		IntPtr srsPacketPtr;
+		int leftSpinState = 0;
+		int rightSpinState = 0;
 
 		Settings settings = new();
 
-		DispatcherTimer dispatcherTimer = new();
-
-		IRSDKSharper irsdk = new();
+		readonly DispatcherTimer dispatcherTimer = new();
+		readonly IRacingSdk irsdk = new();
+		readonly ArduinoConnection arduinoConnection = new( handshake );
 
 		bool isReplay = false;
 
 		public MainWindow()
 		{
-			disableUpdates = true;
+			disableWindowUpdates = true;
 
 			InitializeComponent();
-
-			udpClient = new UdpClient();
-
-			srsPacket = new SRSPacket
-			{
-				apiMode = "lla".ToCharArray(),
-				version = 101,
-				leftFanPower = 0,
-				rightFanPower = 0,
-				rpm = 0,
-				maxRpm = 8000,
-				gear = 0
-			};
-
-			srsPacketSize = Marshal.SizeOf( srsPacket );
-
-			srsPacketBytes = new byte[ srsPacketSize ];
-
-			srsPacketPtr = Marshal.AllocHGlobal( srsPacketSize );
 
 			LoadSettings();
 
@@ -82,7 +65,7 @@ namespace IRWindSim
 
 			curve.IsChecked = settings.curve;
 
-			disableUpdates = false;
+			disableWindowUpdates = false;
 
 			dispatcherTimer.Tick += OnTick;
 			dispatcherTimer.Interval = new TimeSpan( 0, 0, 0, 0, 250 );
@@ -97,11 +80,23 @@ namespace IRWindSim
 			irsdk.OnTelemetryData += OnTelemetryData;
 
 			irsdk.Start();
+
+			arduinoConnection.ArduinoConnected += OnArduinoConnected;
+			arduinoConnection.ArduinoDisconnected += OnArduinoDisconnected;
+
+			arduinoConnection.Start();
+		}
+
+		private void Window_Closing( object? sender, CancelEventArgs e )
+		{
+			arduinoConnection.Stop();
+			irsdk.Stop();
+			dispatcherTimer.Stop();
 		}
 
 		private void Update( object sender, RoutedEventArgs e )
 		{
-			if ( !disableUpdates )
+			if ( !disableWindowUpdates )
 			{
 				settings.units = ( imperial.IsChecked ?? false ) ? Settings.Units.Imperial : Settings.Units.Metric;
 
@@ -120,7 +115,7 @@ namespace IRWindSim
 			}
 		}
 
-		private void UpdateBand( Settings.Band band, TextBox speed, TextBox fanPower )
+		private static void UpdateBand( Settings.Band band, TextBox speed, TextBox fanPower )
 		{
 			var success = int.TryParse( speed.Text, out var value );
 
@@ -168,12 +163,9 @@ namespace IRWindSim
 		{
 			if ( testBand != -1 )
 			{
-				var fanPower = settings.bands[ testBand ].fanPower;
+				var fanPower = Math.Min( 320, Math.Max( 0, settings.bands[ testBand ].fanPower ) );
 
-				srsPacket.leftFanPower = fanPower;
-				srsPacket.rightFanPower = fanPower;
-
-				SendSRSPacket();
+				UpdateFanPowers( fanPower, fanPower );
 			}
 		}
 
@@ -203,14 +195,62 @@ namespace IRWindSim
 				var lx = Math.Max( 0, -velocityY );
 				var rx = Math.Max( 0, velocityY );
 
-				srsPacket.leftFanPower = GetFanPower( (float) Math.Sqrt( lx * lx + z * z ) );
-				srsPacket.rightFanPower = GetFanPower( (float) Math.Sqrt( rx * rx + z * z ) );
+				if ( !settings.curve )
+				{
+					z += lx;
+					z += rx;
 
-				SendSRSPacket();
+					lx = 0;
+					rx = 0;
+				}
+
+				if ( settings.units == Settings.Units.Imperial )
+				{
+					z *= MPS_TO_MPH;
+					lx *= MPS_TO_MPH;
+					rx *= MPS_TO_MPH;
+				}
+				else
+				{
+					z *= MPS_TO_KPH;
+					lx *= MPS_TO_KPH;
+					rx *= MPS_TO_KPH;
+				}
+
+				var leftFanPower = GetFanPower( (float) Math.Sqrt( Math.Max( 0, ( lx * lx ) - ( rx * rx ) + ( z * z ) ) ) );
+				var rightFanPower = GetFanPower( (float) Math.Sqrt( Math.Max( 0, ( rx * rx ) - ( lx * lx ) + ( z * z ) ) ) );
+
+				Debug.WriteLine( $"z={z}, lx={lx}, rx={rx}, lfp={leftFanPower}, rfp={rightFanPower}" );
+
+				UpdateFanPowers( leftFanPower, rightFanPower );
 			}
 		}
 
-		private float GetFanPower( float speed )
+		private void OnArduinoConnected( object connection, ArduinoConnection.ConnectionEventArgs connectionInformation )
+		{
+			arduinoIsConnected = true;
+
+			Debug.WriteLine( $"Arduino connected on port {connectionInformation.ArduinoPort?.PortName}!" );
+
+			Dispatcher.Invoke( () =>
+			{
+				status.Content = "Connected 😊";
+			} );
+		}
+
+		private void OnArduinoDisconnected( object connection, ArduinoConnection.ConnectionEventArgs connectionInformation )
+		{
+			arduinoIsConnected = false;
+
+			Debug.WriteLine( "Arduino disconnected!" );
+
+			Dispatcher.Invoke( () =>
+			{
+				status.Content = "NOT CONNECTED 😭";
+			} );
+		}
+
+		private int GetFanPower( float speed )
 		{
 			if ( speed <= 0 )
 			{
@@ -241,16 +281,50 @@ namespace IRWindSim
 
 			var t = ( speed - settings.bands[ band0 ].speed ) / ds;
 
-			return ( settings.bands[ band1 ].fanPower - settings.bands[ band0 ].fanPower ) * t + settings.bands[ band0 ].fanPower;
+			return (int) Math.Min( 320, Math.Max( 0, ( settings.bands[ band1 ].fanPower - settings.bands[ band0 ].fanPower ) * t + settings.bands[ band0 ].fanPower ) );
 		}
 
-		private void SendSRSPacket()
+		private void UpdateFanPowers( int leftFanPower, int rightFanPower )
 		{
-			Marshal.StructureToPtr( srsPacket, srsPacketPtr, false );
+			if ( arduinoIsConnected )
+			{
+				var arduinoPort = arduinoConnection.ArduinoPort;
 
-			Marshal.Copy( srsPacketPtr, srsPacketBytes, 0, srsPacketSize );
+				if ( arduinoPort != null )
+				{
+					try
+					{
+						if ( leftFanPower < 10 )
+						{
+							leftSpinState = 0;
+						}
+						else if ( leftSpinState < 2 )
+						{
+							leftSpinState++;
 
-			udpClient.Send( srsPacketBytes, srsPacketBytes.Length, "localhost", 33001 );
+							leftFanPower = 160;
+						}
+
+						arduinoPort.Write( $"L{leftFanPower:000}" );
+
+						if ( rightFanPower < 10 )
+						{
+							rightSpinState = 0;
+						}
+						else if ( rightSpinState < 2 )
+						{
+							rightSpinState++;
+
+							rightFanPower = 160;
+						}
+
+						arduinoPort.Write( $"R{rightFanPower:000}" );
+					}
+					catch
+					{
+					}
+				}
+			}
 		}
 
 		private void LoadSettings()

@@ -2,13 +2,15 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <StartupObject>IRWindSim.App</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IRSDKSharper" Version="1.0.10" />
+    <PackageReference Include="IRSDKSharper" Version="1.1.0" />
+    <PackageReference Include="System.IO.Ports" Version="9.0.0-rc.1.24431.7" />
   </ItemGroup>
 
 </Project>
